@@ -1,5 +1,7 @@
 package com.secureVault.service;
 
+import com.secureVault.common.exception.InvalidCredentialsException;
+import com.secureVault.common.exception.ResourceAlreadyExistsException;
 import com.secureVault.dto.AuthResponse;
 import com.secureVault.dto.LoginDto;
 import com.secureVault.dto.RequestDto;
@@ -15,15 +17,19 @@ public class AuthService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
-    public AuthService(UserRepository userRepository, PasswordEncoder passwordEncoder,JwtService jwtService) {
+
+    public AuthService(UserRepository userRepository, PasswordEncoder passwordEncoder, JwtService jwtService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
-        this.jwtService=jwtService;
+        this.jwtService = jwtService;
     }
 
-    public User register(RequestDto request){
+    public User register(RequestDto request) {
+
         if (userRepository.findByEmail(request.getEmail()).isPresent()) {
-            throw new RuntimeException("Email already registered");
+            throw new ResourceAlreadyExistsException(
+                    "Email already registered"
+            );
         }
         User user = new User();
         user.setName(request.getName());
@@ -39,8 +45,9 @@ public class AuthService {
         User user = userRepository
                 .findByEmail(request.getEmail())
                 .orElseThrow(() ->
-                        new RuntimeException("Invalid email or password")
-                );
+                        new InvalidCredentialsException(
+                                "Invalid email or password"
+                        ));
 
         boolean passwordMatches =
                 passwordEncoder.matches(
@@ -49,7 +56,9 @@ public class AuthService {
                 );
 
         if (!passwordMatches) {
-            throw new RuntimeException("Invalid email or password");
+            throw new InvalidCredentialsException(
+                    "Invalid email or password"
+            );
         }
         String token = jwtService.generateToken(user.getEmail());
         return new AuthResponse(token);
