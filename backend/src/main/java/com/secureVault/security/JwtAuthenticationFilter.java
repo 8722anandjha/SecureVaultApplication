@@ -4,6 +4,7 @@ import com.secureVault.entities.User;
 import com.secureVault.repository.UserRepository;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -36,19 +37,25 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             FilterChain filterChain)
             throws ServletException, IOException {
 
-        String authHeader = request.getHeader("Authorization");
+        Cookie[] cookies = request.getCookies();
 
-        if (authHeader == null ||
-                !authHeader.startsWith("Bearer ")) {
+        String token = null;
 
+        if (cookies != null) {
+            for (Cookie cookie : cookies) {
+                if ("securevault_token".equals(cookie.getName())) {
+                    token = cookie.getValue();
+                    break;
+                }
+            }
+        }
+
+        if (token == null) {
             filterChain.doFilter(request, response);
             return;
         }
 
-        String token = authHeader.substring(7);
-
         if (!jwtService.isTokenValid(token)) {
-
             filterChain.doFilter(request, response);
             return;
         }

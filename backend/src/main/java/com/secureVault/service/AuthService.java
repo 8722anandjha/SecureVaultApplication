@@ -8,6 +8,7 @@ import com.secureVault.dto.RequestDto;
 import com.secureVault.entities.User;
 import com.secureVault.repository.UserRepository;
 import com.secureVault.security.JwtService;
+import org.springframework.http.ResponseCookie;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -61,6 +62,12 @@ public class AuthService {
             );
         }
         String token = jwtService.generateToken(user.getEmail());
+
+
+
         return new AuthResponse(token);
     }
+
+
+
 }
