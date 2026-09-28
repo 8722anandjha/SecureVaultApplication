@@ -29,7 +29,7 @@ public class AuthService {
 
         if (userRepository.findByEmail(request.getEmail()).isPresent()) {
             throw new ResourceAlreadyExistsException(
-                    "Email already registered"
+                    "Full Name or Email already registered"
             );
         }
         User user = new User();
