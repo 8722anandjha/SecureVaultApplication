@@ -58,4 +58,19 @@ public class GlobalExceptionHandler {
                 .status(HttpStatus.BAD_REQUEST)
                 .body(error);
     }
+
+    @ExceptionHandler(CredentialNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleCredentialNotFound(
+            CredentialNotFoundException exception
+    ) {
+        ErrorResponse errorResponse =
+                new ErrorResponse(
+                        exception.getMessage(),
+                        HttpStatus.NOT_FOUND.value()
+                );
+
+        return ResponseEntity
+                .status(HttpStatus.NOT_FOUND)
+                .body(errorResponse);
+    }
 }
