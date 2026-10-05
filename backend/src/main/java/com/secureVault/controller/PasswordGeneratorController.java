@@ -2,6 +2,9 @@ package com.secureVault.controller;
 
 import com.secureVault.dto.PasswordGenerateRequest;
 import com.secureVault.dto.PasswordGenerateResponse;
+import com.secureVault.dto.PasswordStrengthResponse;
+import com.secureVault.service.PasswordGeneratorService;
+import com.secureVault.service.PasswordStrengthService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -12,8 +15,8 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class PasswordGeneratorController {
 
-    private final com.secureVault.password.PasswordGeneratorService passwordGeneratorService;
-
+    private final PasswordGeneratorService passwordGeneratorService;
+    private final PasswordStrengthService passwordStrengthService;
 
     @PostMapping("/generate")
     public ResponseEntity<PasswordGenerateResponse> generatePassword(
@@ -29,10 +32,16 @@ public class PasswordGeneratorController {
                         request.isIncludeSymbols()
                 );
 
+        PasswordStrengthResponse strength =
+                passwordStrengthService.analyze(
+                        password
+                );
         PasswordGenerateResponse response =
                 new PasswordGenerateResponse(
                         password,
-                        password.length()
+                        password.length(),
+                        strength.getScore(),
+                        strength.getStrength()
                 );
 
         return ResponseEntity.ok(response);

@@ -1,4 +1,4 @@
-package com.secureVault.password;
+package com.secureVault.service;
 
 import org.springframework.stereotype.Service;
 

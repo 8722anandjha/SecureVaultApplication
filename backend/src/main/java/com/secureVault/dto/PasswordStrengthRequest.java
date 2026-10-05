@@ -1,5 +1,6 @@
 package com.secureVault.dto;
 
+import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -9,13 +10,8 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class PasswordGenerateResponse {
+public class PasswordStrengthRequest {
 
+    @NotBlank(message = "Password is required")
     private String password;
-
-    private int length;
-
-    private int score;
-
-    private String strength;
 }
