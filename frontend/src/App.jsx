@@ -11,6 +11,7 @@ import Dashboard from "./pages/Dashboard";
 
 import { fetchCurrentUser } from "./store/authSlice";
 import ProtectedRoute from "./components/ProtectedRoute";
+import Vault from "./pages/Vault";
 
 
 function App() {
@@ -48,7 +49,12 @@ function App() {
                         </ProtectedRoute>
                     }
                 />
-            </Routes>
+                <Route path="/vault" element={
+                    <ProtectedRoute>
+                        <Vault/>
+                    </ProtectedRoute>
+                } />
+                </Routes>
         </BrowserRouter>
     );
 }

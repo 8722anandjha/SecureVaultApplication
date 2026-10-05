@@ -34,3 +34,10 @@ export const updateCredential = async (
 export const deleteCredential = async (id) => {
     await api.delete(`/credentials/${id}`);
 };
+
+export const revealCredentialPassword = async (id) => {
+    const response = await api.get(
+        `/credentials/${id}`
+    );
+    return response.data;
+};

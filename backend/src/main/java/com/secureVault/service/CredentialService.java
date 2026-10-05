@@ -135,6 +135,28 @@ public class CredentialService {
         credentialRepository.delete(credential);
     }
 
+    public String getCredentialPassword(
+            Long credentialId,
+            User currentUser
+    ) {
+
+        Credential credential =
+                credentialRepository
+                        .findByIdAndUser(
+                                credentialId,
+                                currentUser
+                        )
+                        .orElseThrow(() ->
+                                new RuntimeException(
+                                        "Credential not found"
+                                )
+                        );
+
+        return encryptionService.decrypt(
+                credential.getPassword()
+        );
+    }
+
     private User getUserByEmail(String email) {
         return userRepository.findByEmail(email)
                 .orElseThrow(() ->

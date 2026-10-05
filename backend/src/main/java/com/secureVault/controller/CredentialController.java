@@ -2,6 +2,8 @@ package com.secureVault.controller;
 
 import com.secureVault.dto.CredentialRequest;
 import com.secureVault.dto.CredentialResponse;
+import com.secureVault.entities.User;
+import com.secureVault.repository.UserRepository;
 import com.secureVault.service.CredentialService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -18,7 +20,7 @@ import java.util.List;
 public class CredentialController {
 
     private final CredentialService credentialService;
-
+    private final UserRepository userRepository;
     @PostMapping
     public ResponseEntity<CredentialResponse> createCredential(
             @Valid @RequestBody CredentialRequest request,
@@ -86,4 +88,25 @@ public class CredentialController {
 
         return ResponseEntity.noContent().build();
     }
+
+    @GetMapping("/{id}/password")
+    public ResponseEntity<String> getCredentialPassword(
+            @PathVariable Long id,
+            Authentication authentication
+    ) {
+
+        String email = authentication.getName();
+
+        User currentUser = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        String password =
+                credentialService.getCredentialPassword(
+                        id,
+                        currentUser
+                );
+
+        return ResponseEntity.ok(password);
+    }
 }
+
