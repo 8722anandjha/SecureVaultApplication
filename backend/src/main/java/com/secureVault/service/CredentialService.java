@@ -23,7 +23,7 @@ public class CredentialService {
     private final CredentialRepository credentialRepository;
     private final UserRepository userRepository;
     private final EncryptionService encryptionService;
-
+    private final CredentialPermissionService credentialPermissionService;
     @Transactional
     public CredentialResponse createCredential(
             CredentialRequest request,
@@ -81,58 +81,88 @@ public class CredentialService {
         return mapToResponse(credential);
     }
 
-    @Transactional
     public CredentialResponse updateCredential(
-            Long id,
+            Long credentialId,
             CredentialRequest request,
-            String email
+            User currentUser
     ) {
-        User user = getUserByEmail(email);
 
         Credential credential =
                 credentialRepository
-                        .findByIdAndUser(id, user)
+                        .findById(credentialId)
                         .orElseThrow(() ->
-                                new CredentialNotFoundException(
+                                new RuntimeException(
                                         "Credential not found"
                                 )
                         );
 
-        credential.setTitle(request.getTitle());
-        credential.setUsername(request.getUsername());
-        credential.setPassword(
-                encryptionService.encrypt(
-                        request.getPassword()
-                )
+        credentialPermissionService.canEdit(
+                credential,
+                currentUser
         );
-        credential.setUrl(request.getUrl());
-        credential.setType(request.getType());
-        credential.setNotes(request.getNotes());
-        credential.setFavorite(request.isFavorite());
 
-        Credential updatedCredential =
+        credential.setTitle(
+                request.getTitle()
+        );
+
+        credential.setUsername(
+                request.getUsername()
+        );
+
+        credential.setUrl(
+                request.getUrl()
+        );
+
+        credential.setType(
+                request.getType()
+        );
+
+        credential.setNotes(
+                request.getNotes()
+        );
+
+        credential.setFavorite(
+                request.isFavorite()
+        );
+
+        if (request.getPassword() != null
+                && !request.getPassword().isBlank()) {
+
+            credential.setPassword(
+                    encryptionService.encrypt(
+                            request.getPassword()
+                    )
+            );
+        }
+
+        Credential updated =
                 credentialRepository.save(credential);
 
-        return mapToResponse(updatedCredential);
+        return mapToResponse(updated);
     }
 
-    @Transactional
     public void deleteCredential(
-            Long id,
-            String email
+            Long credentialId,
+            User currentUser
     ) {
-        User user = getUserByEmail(email);
 
         Credential credential =
                 credentialRepository
-                        .findByIdAndUser(id, user)
+                        .findById(credentialId)
                         .orElseThrow(() ->
-                                new CredentialNotFoundException(
+                                new RuntimeException(
                                         "Credential not found"
                                 )
                         );
 
-        credentialRepository.delete(credential);
+        credentialPermissionService.canManage(
+                credential,
+                currentUser
+        );
+
+        credentialRepository.delete(
+                credential
+        );
     }
 
     public String getCredentialPassword(
@@ -142,19 +172,43 @@ public class CredentialService {
 
         Credential credential =
                 credentialRepository
-                        .findByIdAndUser(
-                                credentialId,
-                                currentUser
-                        )
+                        .findById(credentialId)
                         .orElseThrow(() ->
                                 new RuntimeException(
                                         "Credential not found"
                                 )
                         );
 
+        credentialPermissionService.canView(
+                credential,
+                currentUser
+        );
+
         return encryptionService.decrypt(
                 credential.getPassword()
         );
+    }
+
+    public CredentialResponse getAccessibleCredential(
+            Long credentialId,
+            User currentUser
+    ) {
+
+        Credential credential =
+                credentialRepository
+                        .findById(credentialId)
+                        .orElseThrow(() ->
+                                new RuntimeException(
+                                        "Credential not found"
+                                )
+                        );
+
+        credentialPermissionService.canView(
+                credential,
+                currentUser
+        );
+
+        return mapToResponse(credential);
     }
 
     private User getUserByEmail(String email) {

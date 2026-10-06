@@ -39,5 +39,5 @@ export const revealCredentialPassword = async (id) => {
     const response = await api.get(
         `/credentials/${id}`
     );
-    return response.data;
+    return response.data.password;
 };

@@ -67,11 +67,14 @@ public class CredentialController {
             @Valid @RequestBody CredentialRequest request,
             Authentication authentication
     ) {
+        User user= userRepository.findByEmail(authentication.getName())
+                .orElseThrow(()-> new RuntimeException("User not found"));
+
         return ResponseEntity.ok(
                 credentialService.updateCredential(
                         id,
                         request,
-                        authentication.getName()
+                        user
                 )
         );
     }
@@ -81,9 +84,12 @@ public class CredentialController {
             @PathVariable Long id,
             Authentication authentication
     ) {
+        User user= userRepository.findByEmail(authentication.getName())
+                .orElseThrow(()-> new RuntimeException("User not found"));
+
         credentialService.deleteCredential(
                 id,
-                authentication.getName()
+                user
         );
 
         return ResponseEntity.noContent().build();

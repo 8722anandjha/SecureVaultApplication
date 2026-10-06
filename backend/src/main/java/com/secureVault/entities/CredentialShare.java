@@ -1,6 +1,5 @@
 package com.secureVault.entities;
 
-import com.secureVault.entities.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
