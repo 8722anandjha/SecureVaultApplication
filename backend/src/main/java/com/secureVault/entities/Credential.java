@@ -7,6 +7,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "credentials")
@@ -50,6 +52,12 @@ public class Credential {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
+    @OneToMany(
+            mappedBy = "credential",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true
+    )
+    private List<CredentialShare> shares = new ArrayList<>();
     @PrePersist
     protected void onCreate() {
         LocalDateTime now = LocalDateTime.now();

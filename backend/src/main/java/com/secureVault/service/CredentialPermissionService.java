@@ -35,8 +35,8 @@ public class CredentialPermissionService {
                         );
 
         if (share.getExpiresAt() != null
-                && share.getExpiresAt()
-                .isBefore(LocalDateTime.now())) {
+                && !share.getExpiresAt()
+                .isAfter(LocalDateTime.now())) {
 
             throw new RuntimeException(
                     "Credential access has expired"

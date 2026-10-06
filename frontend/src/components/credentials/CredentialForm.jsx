@@ -2,154 +2,95 @@ import { useEffect, useState } from "react";
 
 import { useDispatch } from "react-redux";
 
-import {
-    addCredential,
-    editCredential,
-} from "../../store/credentialSlice.js";
-
+import { addCredential, editCredential } from "../../store/credentialSlice.js";
+import PasswordGenerator from "../password/PasswordGenerator.jsx";
 
 const initialForm = {
+  title: "",
 
-    title: "",
+  username: "",
 
-    username: "",
+  password: "",
 
-    password: "",
+  websiteUrl: "",
 
-    websiteUrl: "",
+  type: "WEBSITE_LOGIN",
 
-    type: "WEBSITE_LOGIN",
+  notes: "",
 
-    notes: "",
-
-    favorite: false,
+  favorite: false,
 };
 
+const CredentialForm = ({ credential, onClose }) => {
+  const dispatch = useDispatch();
 
-const CredentialForm = ({
-    credential,
-    onClose,
-}) => {
+  const [formData, setFormData] = useState(initialForm);
 
-    const dispatch = useDispatch();
+  const [submitting, setSubmitting] = useState(false);
 
+  const [showPasswordGenerator, setShowPasswordGenerator] = useState(false);
 
-    const [formData, setFormData] =
-        useState(initialForm);
+  useEffect(() => {
+    if (credential) {
+      setFormData({
+        title: credential.title || "",
 
+        username: credential.username || "",
 
-    const [submitting, setSubmitting] =
-        useState(false);
+        password: "",
 
+        websiteUrl: credential.websiteUrl || "",
 
-    useEffect(() => {
+        type: credential.type || "WEBSITE_LOGIN",
 
-        if (credential) {
+        notes: credential.notes || "",
 
-            setFormData({
+        favorite: credential.favorite || false,
+      });
+    } else {
+      setFormData(initialForm);
+    }
+  }, [credential]);
 
-                title:
-                    credential.title || "",
+  const handleChange = (event) => {
+    const { name, value, type, checked } = event.target;
 
-                username:
-                    credential.username || "",
+    setFormData((current) => ({
+      ...current,
 
-                password: "",
+      [name]: type === "checkbox" ? checked : value,
+    }));
+  };
 
-                websiteUrl:
-                    credential.websiteUrl || "",
+  const handleSubmit = async (event) => {
+    event.preventDefault();
 
-                type:
-                    credential.type ||
-                    "WEBSITE_LOGIN",
+    setSubmitting(true);
 
-                notes:
-                    credential.notes || "",
+    try {
+      if (credential) {
+        await dispatch(
+          editCredential({
+            id: credential.id,
 
-                favorite:
-                    credential.favorite || false,
-            });
+            credentialData: formData,
+          }),
+        ).unwrap();
+      } else {
+        await dispatch(addCredential(formData)).unwrap();
+      }
 
-        } else {
+      onClose();
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
-            setFormData(initialForm);
-        }
-
-    }, [credential]);
-
-
-    const handleChange = (event) => {
-
-        const {
-            name,
-            value,
-            type,
-            checked,
-        } = event.target;
-
-
-        setFormData(
-            current => ({
-
-                ...current,
-
-                [name]:
-                    type === "checkbox"
-                        ? checked
-                        : value,
-            })
-        );
-    };
-
-
-    const handleSubmit = async (event) => {
-
-        event.preventDefault();
-
-        setSubmitting(true);
-
-
-        try {
-
-            if (credential) {
-
-                await dispatch(
-                    editCredential({
-
-                        id: credential.id,
-
-                        credentialData:
-                            formData,
-
-                    })
-                ).unwrap();
-
-            } else {
-
-                await dispatch(
-                    addCredential(
-                        formData
-                    )
-                ).unwrap();
-            }
-
-
-            onClose();
-
-        } catch (error) {
-
-            console.error(error);
-
-        } finally {
-
-            setSubmitting(false);
-        }
-    };
-
-
-    return (
-
-        <div className="
+  return (
+    <div
+      className="
             fixed
             inset-0
             z-50
@@ -158,9 +99,10 @@ const CredentialForm = ({
             justify-center
             bg-slate-950/50
             p-4
-        ">
-
-            <div className="
+        "
+    >
+      <div
+        className="
                 max-h-[90vh]
                 w-full
                 max-w-2xl
@@ -169,88 +111,80 @@ const CredentialForm = ({
                 bg-white
                 p-6
                 shadow-2xl
-            ">
-
-                <div className="
+            "
+      >
+        <div
+          className="
                     mb-6
                     flex
                     items-center
                     justify-between
-                ">
-
-                    <div>
-
-                        <h2 className="
+                "
+        >
+          <div>
+            <h2
+              className="
                             text-xl
                             font-bold
                             text-slate-900
-                        ">
-                            {credential
-                                ? "Edit Credential"
-                                : "Add Credential"}
-                        </h2>
+                        "
+            >
+              {credential ? "Edit Credential" : "Add Credential"}
+            </h2>
 
-                        <p className="
+            <p
+              className="
                             mt-1
                             text-sm
                             text-slate-500
-                        ">
-                            {credential
-                                ? "Update your saved credential."
-                                : "Securely save a new credential."}
-                        </p>
+                        "
+            >
+              {credential
+                ? "Update your saved credential."
+                : "Securely save a new credential."}
+            </p>
+          </div>
 
-                    </div>
-
-
-                    <button
-                        type="button"
-                        onClick={onClose}
-                        className="
+          <button
+            type="button"
+            onClick={onClose}
+            className="
                             text-2xl
                             text-slate-400
                             hover:text-slate-700
                         "
-                    >
-                        ×
-                    </button>
+          >
+            ×
+          </button>
+        </div>
 
-                </div>
-
-
-                <form
-                    onSubmit={handleSubmit}
-                    className="space-y-5"
-                >
-
-                    <div className="
+        <form onSubmit={handleSubmit} className="space-y-5">
+          <div
+            className="
                         grid
                         gap-5
                         md:grid-cols-2
-                    ">
-
-                        <div>
-
-                            <label className="
+                    "
+          >
+            <div>
+              <label
+                className="
                                 text-sm
                                 font-medium
                                 text-slate-700
-                            ">
-                                Title
-                            </label>
+                            "
+              >
+                Title
+              </label>
 
-                            <input
-                                name="title"
-                                value={
-                                    formData.title
-                                }
-                                onChange={
-                                    handleChange
-                                }
-                                required
-                                maxLength={100}
-                                placeholder="e.g. GitHub"
-                                className="
+              <input
+                name="title"
+                value={formData.title}
+                onChange={handleChange}
+                required
+                maxLength={100}
+                placeholder="e.g. GitHub"
+                className="
                                     mt-2
                                     w-full
                                     rounded-lg
@@ -263,30 +197,25 @@ const CredentialForm = ({
                                     focus:ring-2
                                     focus:ring-indigo-100
                                 "
-                            />
+              />
+            </div>
 
-                        </div>
-
-
-                        <div>
-
-                            <label className="
+            <div>
+              <label
+                className="
                                 text-sm
                                 font-medium
                                 text-slate-700
-                            ">
-                                Credential Type
-                            </label>
+                            "
+              >
+                Credential Type
+              </label>
 
-                            <select
-                                name="type"
-                                value={
-                                    formData.type
-                                }
-                                onChange={
-                                    handleChange
-                                }
-                                className="
+              <select
+                name="type"
+                value={formData.type}
+                onChange={handleChange}
+                className="
                                     mt-2
                                     w-full
                                     rounded-lg
@@ -298,64 +227,42 @@ const CredentialForm = ({
                                     outline-none
                                     focus:border-indigo-500
                                 "
-                            >
+              >
+                <option value="WEBSITE_LOGIN">Website Login</option>
 
-                                <option value="WEBSITE_LOGIN">
-                                    Website Login
-                                </option>
+                <option value="EMAIL_ACCOUNT">Email Account</option>
 
-                                <option value="EMAIL_ACCOUNT">
-                                    Email Account
-                                </option>
+                <option value="BANKING">Banking</option>
 
-                                <option value="BANKING">
-                                    Banking
-                                </option>
+                <option value="SOCIAL_MEDIA">Social Media</option>
 
-                                <option value="SOCIAL_MEDIA">
-                                    Social Media
-                                </option>
+                <option value="APPLICATION">Application</option>
 
-                                <option value="APPLICATION">
-                                    Application
-                                </option>
+                <option value="API_KEY">API Key</option>
 
-                                <option value="API_KEY">
-                                    API Key
-                                </option>
+                <option value="SECURE_NOTE">Secure Note</option>
+              </select>
+            </div>
+          </div>
 
-                                <option value="SECURE_NOTE">
-                                    Secure Note
-                                </option>
-
-                            </select>
-
-                        </div>
-
-                    </div>
-
-
-                    <div>
-
-                        <label className="
+          <div>
+            <label
+              className="
                             text-sm
                             font-medium
                             text-slate-700
-                        ">
-                            Username / Email
-                        </label>
+                        "
+            >
+              Username / Email
+            </label>
 
-                        <input
-                            name="username"
-                            value={
-                                formData.username
-                            }
-                            onChange={
-                                handleChange
-                            }
-                            maxLength={255}
-                            placeholder="username or email"
-                            className="
+            <input
+              name="username"
+              value={formData.username}
+              onChange={handleChange}
+              maxLength={255}
+              placeholder="username or email"
+              className="
                                 mt-2
                                 w-full
                                 rounded-lg
@@ -366,37 +273,81 @@ const CredentialForm = ({
                                 outline-none
                                 focus:border-indigo-500
                             "
-                        />
+            />
+          </div>
 
-                    </div>
+          <div>
+
+    <label className="mb-2 block text-sm font-medium text-gray-700">
+        Password
+    </label>
+
+    <div className="flex gap-2">
+
+        <input
+            type="password"
+            value={formData.password}
+            onChange={(e) =>
+                setFormData({
+                    ...formData,
+                    password: e.target.value,
+                })
+            }
+            className="flex-1 rounded-lg border border-gray-300 px-4 py-2"
+        />
+
+        <button
+            type="button"
+            onClick={() =>
+                setShowPasswordGenerator(
+                    !showPasswordGenerator
+                )
+            }
+            className="rounded-lg bg-indigo-100 px-4 py-2 text-sm font-medium text-indigo-700 hover:bg-indigo-200"
+        >
+            Generate
+        </button>
+
+    </div>
+
+</div>
+                
+{showPasswordGenerator && (
+    <div className="mt-4">
+        <PasswordGenerator
+            onUsePassword={(generatedPassword) => {
+
+                setFormData({
+                    ...formData,
+                    password: generatedPassword,
+                });
+
+                setShowPasswordGenerator(false);
+            }}
+        />
+    </div>
+)}
 
 
-                    <div>
-
-                        <label className="
+          <div>
+            <label
+              className="
                             text-sm
                             font-medium
                             text-slate-700
-                        ">
-                            Password
-                        </label>
+                        "
+            >
+              Website URL
+            </label>
 
-                        <input
-                            type="password"
-                            name="password"
-                            value={
-                                formData.password
-                            }
-                            onChange={
-                                handleChange
-                            }
-                            required={!credential}
-                            placeholder={
-                                credential
-                                    ? "Enter new password to replace current one"
-                                    : "Enter password"
-                            }
-                            className="
+            <input
+              type="url"
+              name="websiteUrl"
+              value={formData.websiteUrl}
+              onChange={handleChange}
+              maxLength={500}
+              placeholder="https://example.com"
+              className="
                                 mt-2
                                 w-full
                                 rounded-lg
@@ -407,69 +358,27 @@ const CredentialForm = ({
                                 outline-none
                                 focus:border-indigo-500
                             "
-                        />
+            />
+          </div>
 
-                    </div>
-
-
-                    <div>
-
-                        <label className="
+          <div>
+            <label
+              className="
                             text-sm
                             font-medium
                             text-slate-700
-                        ">
-                            Website URL
-                        </label>
+                        "
+            >
+              Notes
+            </label>
 
-                        <input
-                            type="url"
-                            name="websiteUrl"
-                            value={
-                                formData.websiteUrl
-                            }
-                            onChange={
-                                handleChange
-                            }
-                            maxLength={500}
-                            placeholder="https://example.com"
-                            className="
-                                mt-2
-                                w-full
-                                rounded-lg
-                                border
-                                border-slate-200
-                                px-4
-                                py-3
-                                outline-none
-                                focus:border-indigo-500
-                            "
-                        />
-
-                    </div>
-
-
-                    <div>
-
-                        <label className="
-                            text-sm
-                            font-medium
-                            text-slate-700
-                        ">
-                            Notes
-                        </label>
-
-                        <textarea
-                            name="notes"
-                            value={
-                                formData.notes
-                            }
-                            onChange={
-                                handleChange
-                            }
-                            rows={4}
-                            placeholder="Additional secure notes..."
-                            className="
+            <textarea
+              name="notes"
+              value={formData.notes}
+              onChange={handleChange}
+              rows={4}
+              placeholder="Additional secure notes..."
+              className="
                                 mt-2
                                 w-full
                                 resize-none
@@ -481,59 +390,55 @@ const CredentialForm = ({
                                 outline-none
                                 focus:border-indigo-500
                             "
-                        />
+            />
+          </div>
 
-                    </div>
-
-
-                    <label className="
+          <label
+            className="
                         flex
                         cursor-pointer
                         items-center
                         gap-3
-                    ">
-
-                        <input
-                            type="checkbox"
-                            name="favorite"
-                            checked={
-                                formData.favorite
-                            }
-                            onChange={
-                                handleChange
-                            }
-                            className="
+                    "
+          >
+            <input
+              type="checkbox"
+              name="favorite"
+              checked={formData.favorite}
+              onChange={handleChange}
+              className="
                                 h-4
                                 w-4
                                 rounded
                                 border-slate-300
                                 text-indigo-600
                             "
-                        />
+            />
 
-                        <span className="
+            <span
+              className="
                             text-sm
                             text-slate-700
-                        ">
-                            Add to favorites
-                        </span>
+                        "
+            >
+              Add to favorites
+            </span>
+          </label>
 
-                    </label>
-
-
-                    <div className="
+          <div
+            className="
                         flex
                         justify-end
                         gap-3
                         border-t
                         border-slate-100
                         pt-5
-                    ">
-
-                        <button
-                            type="button"
-                            onClick={onClose}
-                            className="
+                    "
+          >
+            <button
+              type="button"
+              onClick={onClose}
+              className="
                                 rounded-lg
                                 border
                                 border-slate-200
@@ -544,15 +449,14 @@ const CredentialForm = ({
                                 text-slate-700
                                 hover:bg-slate-50
                             "
-                        >
-                            Cancel
-                        </button>
+            >
+              Cancel
+            </button>
 
-
-                        <button
-                            type="submit"
-                            disabled={submitting}
-                            className="
+            <button
+              type="submit"
+              disabled={submitting}
+              className="
                                 rounded-lg
                                 bg-indigo-600
                                 px-5
@@ -564,23 +468,18 @@ const CredentialForm = ({
                                 disabled:cursor-not-allowed
                                 disabled:opacity-60
                             "
-                        >
-                            {submitting
-                                ? "Saving..."
-                                : credential
-                                    ? "Update Credential"
-                                    : "Save Credential"}
-                        </button>
-
-                    </div>
-
-                </form>
-
-            </div>
-
-        </div>
-    );
+            >
+              {submitting
+                ? "Saving..."
+                : credential
+                  ? "Update Credential"
+                  : "Save Credential"}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
 };
-
 
 export default CredentialForm;

@@ -3,6 +3,7 @@ package com.secureVault.service;
 
 import com.secureVault.dto.CredentialShareRequest;
 import com.secureVault.dto.CredentialShareResponse;
+import com.secureVault.dto.CredentialShareUpdateRequest;
 import com.secureVault.entities.Credential;
 import com.secureVault.entities.CredentialShare;
 import com.secureVault.entities.User;
@@ -78,6 +79,9 @@ public class CredentialShareService {
         share.setPermission(
                 request.getPermission()
         );
+        share.setExpiresAt(
+                request.getExpiresAt()
+        );
 
         CredentialShare savedShare =
                 credentialShareRepository.save(share);
@@ -146,6 +150,57 @@ public class CredentialShareService {
         }
 
         credentialShareRepository.delete(share);
+    }
+
+    public CredentialShareResponse updateShare(
+            Long credentialId,
+            Long shareId,
+            CredentialShareUpdateRequest request,
+            User currentUser
+    ) {
+
+        Credential credential =
+                credentialRepository
+                        .findByIdAndUser(
+                                credentialId,
+                                currentUser
+                        )
+                        .orElseThrow(() ->
+                                new RuntimeException(
+                                        "Credential not found"
+                                )
+                        );
+
+        CredentialShare share =
+                credentialShareRepository
+                        .findById(shareId)
+                        .orElseThrow(() ->
+                                new RuntimeException(
+                                        "Share not found"
+                                )
+                        );
+
+        if (!share.getCredential()
+                .getId()
+                .equals(credential.getId())) {
+
+            throw new RuntimeException(
+                    "Invalid share"
+            );
+        }
+
+        share.setPermission(
+                request.getPermission()
+        );
+
+        share.setExpiresAt(
+                request.getExpiresAt()
+        );
+
+        CredentialShare updated =
+                credentialShareRepository.save(share);
+
+        return mapToResponse(updated);
     }
 
     private CredentialShareResponse mapToResponse(

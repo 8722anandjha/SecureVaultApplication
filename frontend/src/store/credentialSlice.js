@@ -83,8 +83,8 @@ export const removeCredential = createAsyncThunk(
 
         try {
 
-            return await deleteCredential(id);
-
+            await deleteCredential(id);
+            return id;
         } catch (error) {
 
             return rejectWithValue(
@@ -120,6 +120,55 @@ export const revealPassword = createAsyncThunk(
     }
 );
 
+
+export const shareCredentialThunk =
+    createAsyncThunk(
+        "credentials/shareCredential",
+        async (
+            { credentialId, shareData },
+            { rejectWithValue }
+        ) => {
+
+            try {
+
+                return await shareCredential(
+                    credentialId,
+                    shareData
+                );
+
+            } catch (error) {
+
+                return rejectWithValue(
+                    error.response?.data?.message ||
+                    "Failed to share credential"
+                );
+            }
+        }
+    );
+
+export const fetchCredentialShares =
+    createAsyncThunk(
+        "credentials/fetchCredentialShares",
+        async (
+            credentialId,
+            { rejectWithValue }
+        ) => {
+
+            try {
+
+                return await getCredentialShares(
+                    credentialId
+                );
+
+            } catch (error) {
+
+                return rejectWithValue(
+                    error.response?.data?.message ||
+                    "Failed to load shares"
+                );
+            }
+        }
+    );
 
 const initialState = {
 

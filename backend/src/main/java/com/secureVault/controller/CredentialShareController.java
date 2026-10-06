@@ -2,6 +2,7 @@ package com.secureVault.controller;
 
 import com.secureVault.dto.CredentialShareRequest;
 import com.secureVault.dto.CredentialShareResponse;
+import com.secureVault.dto.CredentialShareUpdateRequest;
 import com.secureVault.entities.User;
 import com.secureVault.repository.UserRepository;
 import com.secureVault.service.CredentialShareService;
@@ -81,5 +82,29 @@ public class CredentialShareController {
 
         return ResponseEntity.noContent()
                 .build();
+    }
+
+    @PutMapping("/{credentialId}/shares/{shareId}")
+    public ResponseEntity<CredentialShareResponse> updateShare(
+            @PathVariable Long credentialId,
+            @PathVariable Long shareId,
+            @Valid @RequestBody CredentialShareUpdateRequest request,
+            Authentication authentication
+    ) {
+
+        String email = authentication.getName();
+
+        User currentUser = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        CredentialShareResponse response =
+                credentialShareService.updateShare(
+                        credentialId,
+                        shareId,
+                        request,
+                        currentUser
+                );
+
+        return ResponseEntity.ok(response);
     }
 }
