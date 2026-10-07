@@ -260,6 +260,7 @@ const CredentialForm = ({ credential, onClose }) => {
               name="username"
               value={formData.username}
               onChange={handleChange}
+              required
               maxLength={255}
               placeholder="username or email"
               className="
@@ -287,6 +288,7 @@ const CredentialForm = ({ credential, onClose }) => {
         <input
             type="password"
             value={formData.password}
+            required
             onChange={(e) =>
                 setFormData({
                     ...formData,
@@ -343,6 +345,7 @@ const CredentialForm = ({ credential, onClose }) => {
             <input
               type="url"
               name="websiteUrl"
+              required
               value={formData.websiteUrl}
               onChange={handleChange}
               maxLength={500}
